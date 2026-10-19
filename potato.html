@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق البطاطس والبطاطا التفاعلي 🥔✨</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Fonts (Tajawal) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amberCustom: '#f59e0b',
+                        orangeCustom: '#ea580c',
+                        potatoDark: '#885028',
+                        potatoLight: '#fde68a',
+                        sweetPotato: '#c2410c'
+                    },
+                    fontFamily: {
+                        tajawal: ['Tajawal', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fef3c7 100%);
+            min-height: 100vh;
+        }
+
+        /* Potato Button Animation */
+        .potato-btn {
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 12px 0 #b45309, 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        .potato-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 0 #b45309, 0 25px 30px -5px rgba(0, 0, 0, 0.25);
+        }
+
+        .potato-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 6px 0 #b45309, 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Pop Animation for Image */
+        @keyframes popIn {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Floating particles */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        .floating-bg {
+            animation: floatSlow 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between min-h-screen p-4 text-slate-800 select-none">
+
+    <!-- Header Section -->
+    <header class="text-center mt-6 z-10">
+        <div class="inline-block bg-amber-100 text-amber-800 font-bold px-4 py-1.5 rounded-full text-sm mb-3 shadow-sm border border-amber-200">
+            🧪 تطبيق تجريبي تحت الإنشاء 🚀
+        </div>
+        <h1 class="text-4xl md:text-5xl font-black text-amber-900 drop-shadow-sm flex items-center justify-center gap-2">
+            <span>مغمرة البطاطس</span>
+            <span class="text-3xl">🥔</span>
+        </h1>
+        <p class="text-amber-700 text-sm md:text-base mt-2 font-medium">اضغط على الزر السحري واكتشف المفاجآت!</p>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-md flex flex-col items-center my-auto py-6 z-10">
+        
+        <!-- Display Card -->
+        <div class="w-full bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-xl border-4 border-amber-200 mb-8 text-center flex flex-col items-center justify-center min-h-[220px] relative overflow-hidden">
+            
+            <!-- Default Placeholder State -->
+            <div id="placeholderState" class="flex flex-col items-center justify-center py-4">
+                <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center text-4xl mb-3 text-amber-600 floating-bg">
+                    ✨
+                </div>
+                <p class="text-amber-800 font-bold text-lg">جاهز للتجربة؟</p>
+                <p class="text-amber-600 text-sm">اضغط على الزر بالأسفل لاستدعاء البطاطا!</p>
+            </div>
+
+            <!-- Dynamic Result View (Hidden initially) -->
+            <div id="resultState" class="hidden flex-col items-center justify-center w-full">
+                <div id="imageContainer" class="relative mb-3">
+                    <div id="potatoEmoji" class="text-7xl md:text-8xl filter drop-shadow-md">🥔</div>
+                </div>
+                <h3 id="potatoTitle" class="text-2xl font-black text-amber-900 mb-1">بطاطساية مقرمشة!</h3>
+                <p id="funFact" class="text-amber-700 text-sm font-bold bg-amber-50 px-4 py-1.5 rounded-xl border border-amber-200">
+                    "أنت الآن بطل البطاطس الرسمي!"
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Big Potato Action Button -->
+        <button id="potatoButton" onclick="handlePotatoClick()" class="potato-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-3xl py-6 rounded-3xl cursor-pointer flex items-center justify-center gap-4 border-2 border-amber-300">
+            <i class="fa-solid fa-hand-pointer text-2xl animate-bounce"></i>
+            <span>بطاطس!</span>
+        </button>
+
+        <!-- Stats & Controls Bar -->
+        <div class="w-full grid grid-cols-2 gap-3 mt-6">
+            <!-- Counter Box -->
+            <div class="bg-white/90 rounded-2xl p-3 shadow-md border border-amber-200 text-center flex flex-col justify-center">
+                <span class="text-xs text-amber-700 font-bold">عدد البطاطسات</span>
+                <span id="clickCounter" class="text-2xl font-black text-amber-900">0</span>
+            </div>
+
+            <!-- Switch Type Button -->
+            <button onclick="toggleMode()" class="bg-orange-100 hover:bg-orange-200 text-orange-800 font-bold p-3 rounded-2xl shadow-sm border border-orange-200 text-sm transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrows-rotate text-orange-600"></i>
+                <span id="modeBtnText">تغيير لـ بطاطا 🍠</span>
+            </button>
+        </div>
+
+        <!-- Reset Button -->
+        <button onclick="resetApp()" class="mt-4 text-xs font-bold text-amber-700 hover:text-amber-900 underline opacity-75 hover:opacity-100 transition">
+            إعادة ضبط العداد
+        </button>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-amber-800/60 pb-2 z-10 font-bold">
+        صُنِع بحب وتجربة مجنونة 🍟 ✨
+    </footer>
+
+    <!-- Audio Web API Synthesizer (No external sound files required) -->
+    <script>
+        // Global App State
+        let count = 0;
+        let currentMode = 'potato'; // 'potato' or 'sweetPotato'
+
+        // Fun Sentences Bank
+        const potatoPhrases = [
+            "بطاطساية مقرمشة ولذيذة! 🍟",
+            "عاش! البطاطساية دي مخصوص عشانك! 🥳",
+            "بطاطس طازجة من الغيط للموبايل! 🌱",
+            "سر السعادة: بطاطس محمرة! 😋",
+            "أنعشت يومك ببطاطساية جديدة! ⚡",
+            "أنت بتضغط بقوة بطاطسية جبارة! 💪"
+        ];
+
+        const sweetPotatoPhrases = [
+            "بطاطا حلوة وسخنة ومشوية! 🍠",
+            "يا سكر أنت! بطاطا زي العسل! 🍯",
+            "دفء البطاطا الحلوة في الشتا! 🔥",
+            "طاقة وسعادة مع كل بطاطاية! ✨",
+            "أحلى بطاطا حلوة لأحلى مطور! 👑"
+        ];
+
+        const EMOJIS = {
+            potato: ['🥔', '🍟', '🥔✨', '🍟😋'],
+            sweetPotato: ['🍠', '🍠🔥', '🍯🍠', '✨🍠']
+        };
+
+        // Sound generator using Web Audio API
+        function playPopSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                
+                // Frequency sweep for pop effect
+                const baseFreq = currentMode === 'potato' ? 400 : 300;
+                osc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(baseFreq * 2.5, ctx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {
+                // Audio Context fallback if blocked by browser
+                console.log("Audio play blocked");
+            }
+        }
+
+        // Main Click Handler
+        function handlePotatoClick() {
+            // Increase Count
+            count++;
+            document.getElementById('clickCounter').innerText = count;
+
+            // Play Pop Sound
+            playPopSound();
+
+            // Trigger Confetti effect
+            confetti({
+                particleCount: 40,
+                spread: 60,
+                origin: { y: 0.7 },
+                colors: currentMode === 'potato' ? ['#f59e0b', '#fbbf24', '#d97706'] : ['#c2410c', '#ea580c', '#f97316']
+            });
+
+            // Update UI State
+            document.getElementById('placeholderState').classList.add('hidden');
+            const resultState = document.getElementById('resultState');
+            resultState.classList.remove('hidden');
+            resultState.classList.add('flex');
+
+            // Pick Random Phrase & Emoji
+            const phrases = currentMode === 'potato' ? potatoPhrases : sweetPotatoPhrases;
+            const emojis = EMOJIS[currentMode];
+
+            const randomPhrase = phrases[Math.floor(Math.random() * phrases.length)];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+            // Set Content
+            const emojiEl = document.getElementById('potatoEmoji');
+            emojiEl.innerText = randomEmoji;
+            
+            // Re-trigger animation
+            emojiEl.classList.remove('animate-pop');
+            void emojiEl.offsetWidth; // Force reflow
+            emojiEl.classList.add('animate-pop');
+
+            document.getElementById('potatoTitle').innerText = currentMode === 'potato' ? 'بطاطس أحلى من العسل!' : 'بطاطا حلوة ومشوية!';
+            document.getElementById('funFact').innerText = randomPhrase;
+        }
+
+        // Toggle Potato / Sweet Potato Mode
+        function toggleMode() {
+            if (currentMode === 'potato') {
+                currentMode = 'sweetPotato';
+                document.getElementById('potatoButton').className = "potato-btn w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-black text-3xl py-6 rounded-3xl cursor-pointer flex items-center justify-center gap-4 border-2 border-orange-300";
+                document.getElementById('potatoButton').querySelector('span').innerText = "بطاطا حلوة!";
+                document.getElementById('modeBtnText').innerText = "تغيير لـ بطاطس 🥔";
+            } else {
+                currentMode = 'potato';
+                document.getElementById('potatoButton').className = "potato-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-3xl py-6 rounded-3xl cursor-pointer flex items-center justify-center gap-4 border-2 border-amber-300";
+                document.getElementById('potatoButton').querySelector('span').innerText = "بطاطس!";
+                document.getElementById('modeBtnText').innerText = "تغيير لـ بطاطا 🍠";
+            }
+
+            // Reset View if visible
+            if (!document.getElementById('resultState').classList.contains('hidden')) {
+                handlePotatoClick();
+            }
+        }
+
+        // Reset Counter
+        function resetApp() {
+            count = 0;
+            document.getElementById('clickCounter').innerText = count;
+            document.getElementById('resultState').classList.add('hidden');
+            document.getElementById('resultState').classList.remove('flex');
+            document.getElementById('placeholderState').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
